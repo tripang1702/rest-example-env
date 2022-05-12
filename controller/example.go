@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"log"
+	"net/http"
 	dbcon "rest-example-env/dbconn"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 type Person struct {
 	Name string
 	Sex  string
-	age  int
+	Age  int
 }
 
 func (co *Controller) GetExample(c *gin.Context) {
@@ -29,4 +30,23 @@ func (co *Controller) GetExample(c *gin.Context) {
 	}
 
 	defer rows.Close()
+
+	var person Person
+	var arrperson []Person
+
+	for rows.Next() {
+		err = rows.Scan(&person.Name, &person.Sex, &person.Age)
+		if err != nil {
+			log.Print(err.Error())
+			return
+		} else {
+			arrperson = append(arrperson, Person{
+				Name: person.Name,
+				Sex:  person.Sex,
+				Age:  person.Age,
+			})
+		}
+	}
+
+	c.IndentedJSON(http.StatusOK, arrperson)
 }
